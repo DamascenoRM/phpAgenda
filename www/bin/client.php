@@ -58,5 +58,48 @@ class Client {
             return false;
         }
     }
+    public function getClientById($id) {
+        try {
+            $sql = "SELECT * FROM clients WHERE id = ?";
+            $params = array($id);
+            $result = $this->db->executeQuery($sql, $params);
+            return $result->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Log or handle the error as needed
+            return false;
+        }
+    }
+    public function getAllClients() {
+        try {
+            $sql = "SELECT * FROM clients";
+            $result = $this->db->executeQuery($sql);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Log or handle the error as needed
+            return false;
+        }
+    }
+    public function updateClientById($id, $personId, $phone) {
+        try {
+            $sql = "UPDATE clients SET person_id = ?, phone = ? WHERE id = ?";
+            $params = array($personId, $phone, $id);
+            $result = $this->db->executeQuery($sql, $params);
+            return $result->rowCount();
+        } catch (PDOException $e) {
+            // Log or handle the error as needed
+            return false;
+        }
+    }
+    public function deleteClientById($id) {
+        try {
+            $sql = "DELETE FROM clients WHERE id = ?";
+            $params = array($id);
+            $result = $this->db->executeQuery($sql, $params);
+            return $result->rowCount();
+        } catch (PDOException $e) {
+            // Log or handle the error as needed
+            return false;
+        }
+    }
 }
 ?>

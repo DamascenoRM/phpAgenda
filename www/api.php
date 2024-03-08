@@ -21,7 +21,7 @@ function sendResponse($status, $data)
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Inicializando objetos das classes
-$user = new User();
+$client = new User();
 $person = new Person();
 $client = new Client();
 
@@ -30,7 +30,7 @@ switch ($method) {
     case 'GET':
         // Obtendo todos os usuários
         if (isset($_GET['users'])) {
-            sendResponse(200, $user->getAllUsers());
+            sendResponse(200, $client->getAllUsers());
         }
         // Obtendo todos as pessoas
         elseif (isset($_GET['persons'])) {
@@ -45,7 +45,7 @@ switch ($method) {
     case 'POST':
         // Criando um usuário
         if (isset($_POST['create_user'])) {
-            $result = $user->createUser($_POST['person_id'], $_POST['username'], $_POST['email']);
+            $result = $client->createUser($_POST['person_id'], $_POST['username'], $_POST['email']);
             if ($result) {
                 sendResponse(201, array("message" => "User created successfully"));
             } else {
@@ -76,7 +76,7 @@ switch ($method) {
         // Atualizando usuário
         parse_str(file_get_contents("php://input"), $_PUT);
         if (isset($_PUT['update_user'])) {
-            $result = $user->updateUserByPersonId($_PUT['person_id'], $_PUT['username'], $_PUT['email']);
+            $result = $client->updateUserByPersonId($_PUT['person_id'], $_PUT['username'], $_PUT['email']);
             if ($result) {
                 sendResponse(200, array("message" => "User updated successfully"));
             } else {
@@ -107,7 +107,7 @@ switch ($method) {
         // Deletando usuário
         parse_str(file_get_contents("php://input"), $_DELETE);
         if (isset($_DELETE['delete_user'])) {
-            $result = $user->deleteUserByPersonId($_DELETE['person_id']);
+            $result = $client->deleteUserByPersonId($_DELETE['person_id']);
             if ($result) {
                 sendResponse(200, array("message" => "User deleted successfully"));
             } else {

@@ -4,7 +4,7 @@ if (!defined('ROOT_PATH')) {
 }
 require_once(ROOT_PATH . '/config.php');
 require_once(ROOT_PATH . '/bin/database.php');
-require_once(ROOT_PATH . '/bin/user.php');
+require_once(ROOT_PATH . '/bin/client.php');
 
 // Função para retornar erros em formato JSON
 function sendResponse($status, $data)
@@ -19,7 +19,7 @@ function sendResponse($status, $data)
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Inicializando objetos das classes
-$client = new User();
+$client = new Client();
 
 // Rotas para a API REST
 switch ($method) {
@@ -31,30 +31,30 @@ switch ($method) {
                 sendResponse(400, array("message" => "Invalid ID"));
                 return;
             }
-            $result = $client->getUserById($clientId);
+            $result = $client->getClientById($clientId);
             if ($result === null || $result == false) {
-                sendResponse(404, array("message" => "User Not Found"));
+                sendResponse(404, array("message" => "Client Not Found"));
             } else {
                 sendResponse(200, $result);
             }
         } else {
-            sendResponse(200, $client->getAllUsers());
+            sendResponse(200, $client->getAllClients());
         }
         break;
 
     case 'POST':
         // Criando um usuário
         $postData = json_decode(file_get_contents('php://input'), true);
-        if (!isset($_POST['person_id'], $_POST['username'], $_POST['email'])) {
+        if (!isset($_POST['person_id'], $_POST['phone'])) {
             sendResponse(400, array("message" => "Missing parameters"));
         }
 
-        $result = $client->createUser($_POST['person_id'], $_POST['username'], $_POST['email']);
+        $result = $client->createClient($_POST['person_id'], $_POST['phone']);
         if ($result) {
-            $clientdata = $client->getUserById($result); // Assume-se que o método createPerson retorne o ID da nova pessoa
-            sendResponse(201, array("message" => "User created successfully", "data" => $clientdata));
+            $clientdata = $client->getClientById($result); // Assume-se que o método createPerson retorne o ID da nova pessoa
+            sendResponse(201, array("message" => "Client created successfully", "data" => $clientdata));
         } else {
-            sendResponse(500, array("message" => "Failed to create user"));
+            sendResponse(500, array("message" => "Failed to create client"));
         }
         break;
 
@@ -72,25 +72,24 @@ switch ($method) {
 
         parse_str(file_get_contents("php://input"), $_PUT);
         #print_r ("$_PUT -> $putData");
-        if (!isset($_PUT['person_id'], $_PUT['username'], $_PUT['email'])) {
-            sendResponse(422, array("message" => "person_id, username and email parameters are required"));
+        if (!isset($_PUT['person_id'], $_PUT['phone'])) {
+            sendResponse(422, array("message" => "person_id, clientname and email parameters are required"));
             return;
         }
 
-        $username = strval(filter_var($_PUT['username'], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $email = strval(filter_var($_PUT['email'], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $clientphone = strval(filter_var($_PUT['phone'], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $person_id = filter_var($_PUT['person_id'], FILTER_VALIDATE_INT);
-        if ($username === false || $email === false || $person_id === false || $person_id === null) {
-            sendResponse(422, array("message" => "Invalid person_id, username and email parameter"));
+        if ($clientphone === false || $person_id === false || $person_id === null) {
+            sendResponse(422, array("message" => "Invalid person_id or phone parameter"));
             return;
         }
 
-        $result = $client->updateUserById($id, $person_id, $username, $email);
+        $result = $client->updateClientById($id, $person_id, $clientphone);
         if ($result) {
-            $clientdata = $client->getUserById($id);
-            sendResponse(200, array("message" => "User updated successfully", "data" => $clientdata));
+            $clientdata = $client->getClientById($id);
+            sendResponse(200, array("message" => "Client updated successfully", "data" => $clientdata));
         } else {
-            sendResponse(500, array("message" => "Failed to update user"));
+            sendResponse(500, array("message" => "Failed to update client"));
         }
         break;
 
@@ -109,12 +108,12 @@ switch ($method) {
             }
             
             // Chama o método para excluir a pessoa
-            $clientdata = $client->getUserById($id); // Assume-se que o método createPerson retorne o ID da nova pessoa
-            $result = $client->deleteUserById($id);
+            $clientdata = $client->getClientById($id); // Assume-se que o método createPerson retorne o ID da nova pessoa
+            $result = $client->deleteClientById($id);
             if ($result) {
-                sendResponse(200, array("message" => "User deleted successfully", "data" => $clientdata));
+                sendResponse(200, array("message" => "Client deleted successfully", "data" => $clientdata));
             } else {
-                sendResponse(500, array("message" => "Failed to delete user"));
+                sendResponse(500, array("message" => "Failed to delete client"));
             }
             break;
 }
