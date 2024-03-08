@@ -1,0 +1,39 @@
+services:
+ web:
+  image: nginx:latest
+  container_name: agenda-nginx
+  restart: always
+  ports:
+   - "80:80"
+  volumes:
+   - ./www:/www
+   - ./default.conf:/etc/nginx/conf.d/default.conf
+  links:
+  - php
+ php:
+  image: damascenor/php8.3-composer:alpine3.19
+  container_name: php-fpm
+  volumes:
+  - ./www:/www
+  links:
+  - db
+  command: sh -c "composer global require zircote/swagger-php && chown -R root:www-data /root/ && chmod -R 750 /root"
+ db:
+  image: mysql:8.0.36
+  container_name: mysql-agenda
+  ports:
+  - "3306:3306"
+  command: --default-authentication-plugin=mysql_native_password
+  restart: always
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: agenda
+ phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=db
+    links:
+      - db
